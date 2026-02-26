@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wildfire Web Map (Portfolio)</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- MarkerCluster (optional but nice for portfolio) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script defer src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Chart.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <script defer src="./js/config.js"></script>
+  <script defer src="./js/utils.js"></script>
+  <script defer src="./js/layers.js"></script>
+  <script defer src="./js/charts.js"></script>
+  <script defer src="./js/ui.js"></script>
+  <script defer src="./js/app.js"></script>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <header class="brand">
+        <div class="brand__row">
+          <div class="brand__title">🔥 Wildfire Portfolio Map</div>
+          <button id="btnCollapse" class="iconBtn" title="Collapse sidebar">⟨⟨</button>
+        </div>
+        <div class="brand__sub">Leaflet · GitHub Pages · GeoJSON</div>
+      </header>
+
+      <section class="card">
+        <div class="card__title">Quick filters</div>
+        <div class="card__body">
+          <input id="searchBox" class="input" placeholder="Search by name / ID..." />
+          <div class="row">
+            <button id="btnZoomBC" class="btn">Zoom to BC</button>
+            <button id="btnClear" class="btn btn--ghost">Clear</button>
+          </div>
+          <div id="status" class="status">Ready.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__title">Basemap</div>
+        <div class="card__body">
+          <select id="basemapSelect" class="input">
+            <option value="osm">OpenStreetMap</option>
+            <option value="topo">Topo</option>
+            <option value="sat">Satellite</option>
+            <option value="gray">Light Gray</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__title">Layers</div>
+        <div class="card__body" id="layerPanel">
+          <!-- generated from config -->
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__title">Legend</div>
+        <div class="card__body" id="legendPanel">
+          <!-- generated -->
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__title">Feature info</div>
+        <div class="card__body">
+          <div id="info" class="info">Click a feature to see details.</div>
+          <div class="hint">Tip: click a Fire Management Area polygon to see a monthly chart.</div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="footer__row">
+          <span>Data placeholders included</span>
+          <span>© You</span>
+        </div>
+        <div class="footer__row">
+          <a class="link" href="./about.html">About / Data sources</a>
+          <a class="link" href="https://leafletjs.com/" target="_blank" rel="noreferrer">Leaflet</a>
+        </div>
+      </footer>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <button id="btnExpand" class="iconBtn iconBtn--floating" title="Expand sidebar">☰</button>
+        <div class="topbar__title">Wildfire Dashboard</div>
+        <div class="topbar__right">
+          <button id="btnResetView" class="btn btn--small">Reset view</button>
+        </div>
+      </div>
+
+      <div id="map"></div>
+
+      <div id="loading" class="loading hidden">
+        <div class="loading__box">
+          <div class="spinner"></div>
+          <div class="loading__text">Loading layers...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

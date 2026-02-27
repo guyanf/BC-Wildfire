@@ -36,7 +36,7 @@ function showMonthlyChart(feature, leafletLayer){
            compute a stable size; prevents a resize loop that was
            stretching the y-axis indefinitely -->
       <canvas id="${canvasId}" style="width:100%;height:160px"></canvas>
-      <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats).</div>
+      <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats2222).</div>
     </div>
   `;
 

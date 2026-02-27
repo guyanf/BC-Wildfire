@@ -43,11 +43,8 @@ function showMonthlyChart(feature, leafletLayer){
   // Put into sidebar info
   setInfo(html);
 
-  // Also open popup on map
-  leafletLayer.bindPopup(html).openPopup();
-
-  // render chart after DOM update; first clean up any previous one
-  setTimeout(()=>{
+  // Helper function to render chart
+  const renderChart = ()=> {
     const el = document.getElementById(canvasId);
     if(!el) return;
     const ctx = el.getContext("2d");
@@ -82,7 +79,18 @@ function showMonthlyChart(feature, leafletLayer){
         scales: { y: { beginAtZero: true } }
       }
     });
-  }, 60);
+  };
+
+  // Render chart in sidebar immediately
+  setTimeout(renderChart, 60);
+
+  // Also open popup on map and render chart when popup opens
+  const popup = leafletLayer.bindPopup(html);
+  popup.on('popupopen', ()=> {
+    // Wait for popup DOM to fully render before drawing chart
+    setTimeout(renderChart, 100);
+  });
+  popup.openPopup();
 }
 
 window.showMonthlyChart = showMonthlyChart;

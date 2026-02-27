@@ -13,6 +13,12 @@ function monthlyDataFromFeature(feature){
   return out;
 }
 
+// keep a reference to the last chart so we can destroy it before
+// creating a new one.  failing to destroy Chart.js instances is the
+// root cause of the runaway y‑axis / memory leak when the popup is
+// opened repeatedly.
+let _lastMonthlyChart = null;
+
 function showMonthlyChart(feature, leafletLayer){
   const p = feature.properties || {};
   const name = escapeHTML(p.name ?? "Fire Area");
@@ -23,10 +29,13 @@ function showMonthlyChart(feature, leafletLayer){
 
   const canvasId = "chart_" + Math.random().toString(16).slice(2);
   const html = `
-    <div style="min-width:260px">
+    <div style="min-width:260px;">
       <div style="font-weight:800;margin-bottom:6px">${name}</div>
       <div style="opacity:.7;margin-bottom:10px">Code: <b>${code}</b></div>
-      <canvas id="${canvasId}" height="160"></canvas>
+      <!-- give the canvas a fixed height so the parent container can
+           compute a stable size; prevents a resize loop that was
+           stretching the y-axis indefinitely -->
+      <canvas id="${canvasId}" style="width:100%;height:160px"></canvas>
       <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats).</div>
     </div>
   `;
@@ -37,12 +46,19 @@ function showMonthlyChart(feature, leafletLayer){
   // Also open popup on map
   leafletLayer.bindPopup(html).openPopup();
 
-  // Render chart after DOM update
+  // render chart after DOM update; first clean up any previous one
   setTimeout(()=>{
     const el = document.getElementById(canvasId);
     if(!el) return;
     const ctx = el.getContext("2d");
-    new Chart(ctx, {
+
+    // destroy existing chart instance if present
+    if(_lastMonthlyChart){
+      try{ _lastMonthlyChart.destroy(); }catch(e){ /* ignore */ }
+      _lastMonthlyChart = null;
+    }
+
+    _lastMonthlyChart = new Chart(ctx, {
       type: "line",
       data: {
         labels: months,
@@ -52,7 +68,9 @@ function showMonthlyChart(feature, leafletLayer){
         }]
       },
       options: {
-        responsive: true,
+        // don't let Chart.js try to resize the canvas – we keep the
+        // canvas dimensions fixed via style attributes above
+        responsive: false,
         maintainAspectRatio: false,
         plugins: { legend: { display: true } },
         scales: { y: { beginAtZero: true } }

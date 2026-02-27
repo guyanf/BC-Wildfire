@@ -46,7 +46,7 @@ function showMonthlyChart(feature, leafletLayer){
       <div style="font-weight:800;margin-bottom:6px">${name}</div>
       <div style="opacity:.7;margin-bottom:10px">Code: <b>${code}</b></div>
       <canvas id="${popupCanvasId}" style="width:100%;height:160px"></canvas>
-      <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats2222).</div>
+      <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats).</div>
     </div>
   `;
 

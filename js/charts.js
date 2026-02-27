@@ -18,6 +18,7 @@ function monthlyDataFromFeature(feature){
 // root cause of the runaway y‑axis / memory leak when the popup is
 // opened repeatedly.
 let _lastMonthlyChart = null;
+let _lastPopupChart = null;
 
 function showMonthlyChart(feature, leafletLayer){
   const p = feature.properties || {};
@@ -27,25 +28,34 @@ function showMonthlyChart(feature, leafletLayer){
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const data = monthlyDataFromFeature(feature);
 
-  const canvasId = "chart_" + Math.random().toString(16).slice(2);
-  const html = `
+  // Create separate canvas IDs for sidebar and popup
+  const sidebarCanvasId = "chart_sidebar_" + Math.random().toString(16).slice(2);
+  const popupCanvasId = "chart_popup_" + Math.random().toString(16).slice(2);
+  
+  const sidebarHtml = `
     <div style="min-width:260px;">
       <div style="font-weight:800;margin-bottom:6px">${name}</div>
       <div style="opacity:.7;margin-bottom:10px">Code: <b>${code}</b></div>
-      <!-- give the canvas a fixed height so the parent container can
-           compute a stable size; prevents a resize loop that was
-           stretching the y-axis indefinitely -->
-      <canvas id="${canvasId}" style="width:100%;height:160px"></canvas>
+      <canvas id="${sidebarCanvasId}" style="width:100%;height:160px"></canvas>
+      <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats2222).</div>
+    </div>
+  `;
+
+  const popupHtml = `
+    <div style="min-width:260px;">
+      <div style="font-weight:800;margin-bottom:6px">${name}</div>
+      <div style="opacity:.7;margin-bottom:10px">Code: <b>${code}</b></div>
+      <canvas id="${popupCanvasId}" style="width:100%;height:160px"></canvas>
       <div style="opacity:.7;font-size:12px;margin-top:8px">Monthly fire counts (demo or your real stats2222).</div>
     </div>
   `;
 
   // Put into sidebar info
-  setInfo(html);
+  setInfo(sidebarHtml);
 
-  // Helper function to render chart
-  const renderChart = ()=> {
-    const el = document.getElementById(canvasId);
+  // Helper function to render chart for sidebar
+  const renderSidebarChart = ()=> {
+    const el = document.getElementById(sidebarCanvasId);
     if(!el) return;
     const ctx = el.getContext("2d");
 
@@ -71,8 +81,42 @@ function showMonthlyChart(feature, leafletLayer){
         }]
       },
       options: {
-        // don't let Chart.js try to resize the canvas – we keep the
-        // canvas dimensions fixed via style attributes above
+        responsive: false,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  };
+
+  // Helper function to render chart for popup
+  const renderPopupChart = ()=> {
+    const el = document.getElementById(popupCanvasId);
+    if(!el) return;
+    const ctx = el.getContext("2d");
+
+    // destroy existing popup chart instance if present
+    if(_lastPopupChart){
+      try{ _lastPopupChart.destroy(); }catch(e){ /* ignore */ }
+      _lastPopupChart = null;
+    }
+
+    // Ensure data is valid array with numbers
+    const validData = Array.isArray(data) ? data.map(v => {
+      const num = Number(v);
+      return isFinite(num) ? num : 0;
+    }) : [];
+
+    _lastPopupChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: months,
+        datasets: [{
+          label: "Fires",
+          data: validData
+        }]
+      },
+      options: {
         responsive: false,
         maintainAspectRatio: false,
         plugins: { legend: { display: true } },
@@ -82,13 +126,13 @@ function showMonthlyChart(feature, leafletLayer){
   };
 
   // Render chart in sidebar immediately
-  setTimeout(renderChart, 60);
+  setTimeout(renderSidebarChart, 60);
 
   // Also open popup on map and render chart when popup opens
-  const popup = leafletLayer.bindPopup(html);
+  const popup = leafletLayer.bindPopup(popupHtml);
   popup.on('popupopen', ()=> {
     // Wait for popup DOM to fully render before drawing chart
-    setTimeout(renderChart, 100);
+    setTimeout(renderPopupChart, 100);
   });
   popup.openPopup();
 }

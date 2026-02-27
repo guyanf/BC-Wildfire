@@ -130,10 +130,18 @@ function showMonthlyChart(feature, leafletLayer){
 
   // Also open popup on map and render chart when popup opens
   const popup = leafletLayer.bindPopup(popupHtml);
-  popup.on('popupopen', ()=> {
+  
+  // Listen to popupadd event which fires when popup is added to DOM
+  popup.on('popupadd', ()=> {
     // Wait for popup DOM to fully render before drawing chart
-    setTimeout(renderPopupChart, 100);
+    setTimeout(renderPopupChart, 150);
   });
+  
+  // Also try popupopen event as fallback
+  popup.on('popupopen', ()=> {
+    setTimeout(renderPopupChart, 150);
+  });
+  
   popup.openPopup();
 }
 

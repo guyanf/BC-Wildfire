@@ -101,7 +101,7 @@ window.APP_CONFIG = {
           "id": "fire_areas",
           "label": "Fire Management Areas",
           "type": "geojson",
-          "path": "./data/boundaries/fire_mgmt_areas.geojson",
+          "path": "./data/boundaries/fire_management_poly.geojson",
           "defaultOn": true,
           "renderer": {
             "kind": "polygon",
@@ -110,12 +110,16 @@ window.APP_CONFIG = {
           },
           "popupFields": [
             {
-              "label": "Area",
+              "label": "Name",
               "field": "name"
             },
             {
-              "label": "Code",
-              "field": "code"
+              "label": "Area(SQKM)",
+              "field": "area_sqkm"
+            },
+            {
+              "label": "Length(KM)",
+              "field": "length_km"
             }
           ],
           "onClick": "showMonthlyChart",

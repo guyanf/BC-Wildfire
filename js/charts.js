@@ -58,13 +58,19 @@ function showMonthlyChart(feature, leafletLayer){
       _lastMonthlyChart = null;
     }
 
+    // Ensure data is valid array with numbers
+    const validData = Array.isArray(data) ? data.map(v => {
+      const num = Number(v);
+      return isFinite(num) ? num : 0;
+    }) : [];
+
     _lastMonthlyChart = new Chart(ctx, {
       type: "line",
       data: {
         labels: months,
         datasets: [{
           label: "Fires",
-          data
+          data: validData
         }]
       },
       options: {

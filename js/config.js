@@ -1,3 +1,10 @@
+// register any custom projections we might need; proj4 will be loaded before this script
+if(window.proj4){
+  // BC Albers / EPSG:3005 (longitude/latitude will be calculated from metres)
+  proj4.defs("EPSG:3005","+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 \
+      +lon_0=-126 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs");
+}
+
 window.APP_CONFIG = {
   "map": {
     "initialView": {
@@ -101,6 +108,8 @@ window.APP_CONFIG = {
           "id": "fire_areas",
           "label": "Fire Management Areas",
           "type": "geojson",
+          // once the source file is converted to EPSG:3005, this tells loader how to reproject
+          "srcCrs": "EPSG:3005",
           "path": "./data/boundaries/fire_management_poly.geojson",
           "defaultOn": true,
           "renderer": {

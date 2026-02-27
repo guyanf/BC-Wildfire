@@ -43,26 +43,18 @@ async function loadGeoJSONLayer(meta){
   const renderer = meta.renderer || {};
   const isPoint = (gj.features || []).some(f => f.geometry && f.geometry.type && f.geometry.type.includes("Point"));
 
-  // If points and cluster requested
-  const wantsCluster = meta.label.toLowerCase().includes("cluster");
-
-  if(isPoint && wantsCluster && L.markerClusterGroup){
-    const cluster = L.markerClusterGroup();
-    const layer = L.geoJSON(gj, {
-      pointToLayer: (feature, latlng)=> circleMarkerFromRenderer(renderer, feature, latlng),
-      onEachFeature: (feature, lyr)=> {
-        const props = feature.properties || {};
-        lyr.on("click", ()=> {
-          setInfo(buildPopupHTML(meta, props));
-        });
-        lyr.bindPopup(buildPopupHTML(meta, props));
-      }
-    });
-    cluster.addLayer(layer);
-    return cluster;
+  // determine if reprojection is required
+  let coordsToLatLng;
+  if(meta.srcCrs && window.proj4){
+    coordsToLatLng = function(coord){
+      // transform from source crs into geographic lon/lat
+      const xy = proj4(meta.srcCrs, "EPSG:4326", coord);
+      return L.latLng(xy[1], xy[0]);
+    };
   }
 
-  const layer = L.geoJSON(gj, {
+  // common options builder
+  const baseOptions = {
     style: (feature)=> styleFromRenderer(renderer, feature),
     pointToLayer: (feature, latlng)=> circleMarkerFromRenderer(renderer, feature, latlng),
     onEachFeature: (feature, lyr)=> {
@@ -77,7 +69,22 @@ async function loadGeoJSONLayer(meta){
       });
       lyr.bindPopup(buildPopupHTML(meta, props));
     }
-  });
+  };
+  if(coordsToLatLng){
+    baseOptions.coordsToLatLng = coordsToLatLng;
+  }
+
+  // If points and cluster requested
+  const wantsCluster = meta.label.toLowerCase().includes("cluster");
+
+  if(isPoint && wantsCluster && L.markerClusterGroup){
+    const cluster = L.markerClusterGroup();
+    const layer = L.geoJSON(gj, baseOptions);
+    cluster.addLayer(layer);
+    return cluster;
+  }
+
+  const layer = L.geoJSON(gj, baseOptions);
   return layer;
 }
 
